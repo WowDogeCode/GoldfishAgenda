@@ -9,29 +9,30 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Repository
 {
-    public class EfRepositoryBase<T> : IRepository<T> where T : class, IEntity, new()
+    public class EfRepositoryBase<TEntity> : IRepository<TEntity> 
+        where TEntity : class, IEntity, new()
     {
-        private readonly DbContext _context;
-        private readonly DbSet<T> _entity;
-        public EfRepositoryBase(DbContext context)
+        private readonly GoldfishAgendaDbContext _context;
+        private readonly DbSet<TEntity> _entity;
+        public EfRepositoryBase(GoldfishAgendaDbContext context)
         {
             _context = context;
-            _entity = context.Set<T>();
+            _entity = context.Set<TEntity>();
         }
-        public void Add(T entity)
+        public void Add(TEntity entity)
         {
             _entity.Add(entity);
             _context.SaveChanges();
         }
-        public IEnumerable<T> Find(Expression<Func<T, bool>> expression = null)
+        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> expression = null)
         {
             return expression == null
                 ? _entity.ToList()
                 : _entity.Where(expression);
         }
-        public T GetById(int id) => _entity.Find(id);
-        public IEnumerable<T> GetAll() => _entity.ToList();
-        public void Remove(T entity)
+        public TEntity GetById(int id) => _entity.Find(id);
+        public IEnumerable<TEntity> GetAll() => _entity.ToList();
+        public void Remove(TEntity entity)
         {
             _entity.Remove(entity);
             _context.SaveChanges();
