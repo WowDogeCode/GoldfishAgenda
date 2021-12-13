@@ -11,10 +11,13 @@ namespace DataAccess.Entities
     {
         [Key]
         public int ItemId { get; set; }
+        [Required]
         [MaxLength(50)]
         public string Borrower { get; set; }
+        [Required]
         [MaxLength(50)]
         public string Lender { get; set; }
+        [Required]
         [MaxLength(50)]
         public string ItemName { get; set; }
     }
