@@ -1,4 +1,5 @@
 using DataAccess;
+using DataAccess.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,6 +29,7 @@ namespace GoldfishAgenda
             services.AddControllersWithViews();
             services.AddDbContext<GoldfishAgendaDbContext>
                 (options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepositoryBase<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
