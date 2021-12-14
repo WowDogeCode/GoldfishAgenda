@@ -15,5 +15,6 @@ namespace DataAccess.Repository
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> expression = null);
         void Add(TEntity entity);
         void Remove(TEntity entity);
+        void Save();
     }
 }

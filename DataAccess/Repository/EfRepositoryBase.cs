@@ -19,11 +19,7 @@ namespace DataAccess.Repository
             _context = context;
             _entity = context.Set<TEntity>();
         }
-        public void Add(TEntity entity)
-        {
-            _entity.Add(entity);
-            _context.SaveChanges();
-        }
+        public void Add(TEntity entity) => _entity.Add(entity);
         public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> expression = null)
         {
             return expression == null
@@ -32,10 +28,7 @@ namespace DataAccess.Repository
         }
         public TEntity GetById(int id) => _entity.Find(id);
         public IEnumerable<TEntity> GetAll() => _entity.ToList();
-        public void Remove(TEntity entity)
-        {
-            _entity.Remove(entity);
-            _context.SaveChanges();
-        }
+        public void Remove(TEntity entity) => _entity.Remove(entity);
+        public void Save() => _context.SaveChanges();
     }
 }

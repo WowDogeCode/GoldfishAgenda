@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,7 @@ namespace DataAccess.Entities
         public string Lender { get; set; }
         [Required]
         [MaxLength(50)]
+        [DisplayName("Item")]
         public string ItemName { get; set; }
     }
 }
