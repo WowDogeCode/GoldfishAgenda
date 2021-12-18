@@ -1,5 +1,7 @@
-﻿using DataAccess.Entities;
+﻿using AutoMapper;
+using DataAccess.Entities;
 using DataAccess.Repository;
+using GoldfishAgenda.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,35 +13,41 @@ namespace GoldfishAgenda.Controllers
     public class ExpenseController : Controller
     {
         private readonly IRepository<Expense> _repository;
-        public ExpenseController(IRepository<Expense> repository) => _repository = repository;
+        private readonly IMapper _mapper;
+        public ExpenseController(IRepository<Expense> repository, IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
 
+        }
         [HttpGet]
         public IActionResult Index()
         {
             var expenses = _repository.GetAll();
-            return View(expenses);
+            return View(_mapper.Map<IEnumerable<ExpenseReadDto>>(expenses));
         }
         [HttpGet]
         public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Expense expense)
+        public IActionResult Create(ExpenseCreateDto expenseCreateDto)
         {
             if (ModelState.IsValid == true)
             {
+                var expense = _mapper.Map<Expense>(expenseCreateDto);
                 _repository.Add(expense);
                 _repository.Save();
                 return RedirectToAction("Index");
             }
-            return View(expense);
+            return View(expenseCreateDto);
         }
 
         [HttpGet]
         public IActionResult Delete(int id)
         {
             var expense = _repository.GetById(id);
-            return expense == null ? NotFound() : View(expense);
+            return expense == null ? NotFound() : View(_mapper.Map<ExpenseReadDto>(expense));
         }
 
         [HttpPost]
@@ -60,23 +68,24 @@ namespace GoldfishAgenda.Controllers
         public IActionResult Update(int id)
         {
             var expense = _repository.GetById(id);
-            return expense == null ? NotFound() : View(expense);
+            return expense == null ? NotFound() : View(_mapper.Map<ExpenseReadDto>(expense));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update(Expense expense)
+        public IActionResult Update(ExpenseReadDto expenseReadDto)
         {
-            var expenseToUpdate = _repository.GetById(expense.ExpenseId);
-            expenseToUpdate.ExpenseName = expense.ExpenseName;
-            expenseToUpdate.Amount = expense.Amount;
+            var expenseToUpdate = _repository.GetById(expenseReadDto.ExpenseId);
+            if (expenseToUpdate == null) return NotFound();
 
-            if(ModelState.IsValid == true)
+            if (ModelState.IsValid == true)
             {
+                expenseToUpdate.ExpenseName = expenseReadDto.ExpenseName;
+                expenseToUpdate.Amount = expenseReadDto.Amount;
                 _repository.Save();
                 return RedirectToAction("Index");
             }
-            return View(expense);
+            return View(_mapper.Map<ExpenseReadDto>(expenseToUpdate));
         }
     }
 }

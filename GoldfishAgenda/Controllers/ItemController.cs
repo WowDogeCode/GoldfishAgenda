@@ -1,5 +1,7 @@
-﻿using DataAccess.Entities;
+﻿using AutoMapper;
+using DataAccess.Entities;
 using DataAccess.Repository;
+using GoldfishAgenda.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,13 +13,17 @@ namespace GoldfishAgenda.Controllers
     public class ItemController : Controller
     {
         private readonly IRepository<Item> _repository;
-        public ItemController(IRepository<Item> repository) => _repository = repository;
-
+        private readonly IMapper _mapper;
+        public ItemController(IRepository<Item> repository, IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
         [HttpGet]
         public IActionResult Index()
         {
             var items = _repository.GetAll();
-            return View(items);
+            return View(_mapper.Map<IEnumerable<ItemReadDto>>(items));
         }
 
         [HttpGet]
@@ -25,22 +31,23 @@ namespace GoldfishAgenda.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Item item)
+        public IActionResult Create(ItemCreateDto itemCreateDto)
         {
             if (ModelState.IsValid == true)
             {
+                var item = _mapper.Map<Item>(itemCreateDto);
                 _repository.Add(item);
                 _repository.Save();
                 return RedirectToAction("Index");
             }
-            return View(item);
+            return View(itemCreateDto);
         }
 
         [HttpGet]
         public IActionResult Delete(int id)
         {
             var item = _repository.GetById(id);
-            return item == null ? NotFound() : View(item);
+            return item == null ? NotFound() : View(_mapper.Map<ItemReadDto>(item));
         }
 
         [HttpPost]
@@ -61,24 +68,25 @@ namespace GoldfishAgenda.Controllers
         public IActionResult Update(int id)
         {
             var item = _repository.GetById(id);
-            return item == null ? NotFound() : View(item);
+            return item == null ? NotFound() : View(_mapper.Map<ItemReadDto>(item));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update(Item item)
+        public IActionResult Update(ItemReadDto itemReadDto)
         {
-            var itemToUpdate = _repository.GetById(item.ItemId);
-            itemToUpdate.ItemName = item.ItemName;
-            itemToUpdate.Borrower = item.Borrower;
-            itemToUpdate.Lender = item.Lender;
+            var itemToUpdate = _repository.GetById(itemReadDto.ItemId);
+            if (itemToUpdate == null) return NotFound();
 
             if (ModelState.IsValid == true)
             {
+                itemToUpdate.ItemName = itemReadDto.ItemName;
+                itemToUpdate.Borrower = itemReadDto.Borrower;
+                itemToUpdate.Lender = itemReadDto.Lender;
                 _repository.Save();
                 return RedirectToAction("Index");
             }
-            return View(itemToUpdate);
+            return View(_mapper.Map<ItemReadDto>(itemToUpdate));
         }
     }
 }
